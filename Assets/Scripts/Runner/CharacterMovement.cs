@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using DefaultNamespace.Runner;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -16,11 +17,13 @@ public class CharacterMovement : MonoBehaviour
 {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private MobileInput mobileInput;
+    [SerializeField] private CharacterMovementBounds movementBounds;
     [SerializeField] private Rigidbody playerRigidbody;
     [SerializeField] private PlayerAnimator playerAnimator;
     [SerializeField] private CapsuleCollider capsuleCollider;
     [SerializeField] private float movementSpeed;
     [SerializeField] private float movementSpeedJumping;
+    [SerializeField] private float movementLeftRightTime = 0.3f;
 
     private bool isGrounded = true;
 
@@ -31,11 +34,72 @@ public class CharacterMovement : MonoBehaviour
 
     [SerializeField] private float borderX;
 
+    private int currentIndex = 1;
 
-    private void Update()
+    private Coroutine leftRightCoroutine;
+
+    private void OnEnable()
     {
-        Jump();
+        mobileInput.OnSwipe += OnSwipe;
     }
+
+    private void OnDisable()
+    {
+        mobileInput.OnSwipe -= OnSwipe;
+    }
+
+    private void OnSwipe(SwipeDirection direction)
+    {
+        switch (direction)
+        {
+            case SwipeDirection.Left:
+            case SwipeDirection.Right:
+                HandleHorizontalMovement(direction);
+                break;
+            case SwipeDirection.Up:
+                Jump();
+                break;
+            case SwipeDirection.Down:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+        }
+    }
+
+    private void HandleHorizontalMovement(SwipeDirection swipeDirection)
+    {
+        int desiredIndex = movementBounds.GetNextIndex(swipeDirection, currentIndex);
+        currentIndex = desiredIndex;
+        Vector3 desiredPosition = movementBounds.GetPosition(desiredIndex);
+        RunCoroutine(MovePlayerToPosition(desiredPosition, movementLeftRightTime));
+    }
+
+    private void RunCoroutine(IEnumerator enumerator)
+    {
+        if (leftRightCoroutine != null)
+        {
+            StopCoroutine(leftRightCoroutine);
+            leftRightCoroutine = null;
+        }
+
+        leftRightCoroutine = StartCoroutine(enumerator);
+    }
+
+    private IEnumerator MovePlayerToPosition(Vector3 position, float time)
+    {
+        Vector3 currentPosition = playerRigidbody.position;
+        float delta = 0f;
+        while (delta <= time)
+        {
+            delta += Time.deltaTime;
+            float percent = delta / time;
+            currentPosition.z = position.z = playerRigidbody.position.z;
+            currentPosition.y = position.y = playerRigidbody.position.y;
+            playerRigidbody.position = Vector3.Lerp(currentPosition, position, percent);
+            yield return null;
+        }
+    }
+
 
     private void FixedUpdate()
     {
@@ -45,44 +109,22 @@ public class CharacterMovement : MonoBehaviour
 
     private void Move()
     {
-        // float horizontal = Input.GetAxis("Horizontal");
-        // float forward = Input.GetAxis("Vertical");
-        // Vector3 input = new(horizontal, 0f, forward);
-        Vector2 mobileInputValue = this.mobileInput.GetInput();
-        Vector3 input = new Vector3(mobileInputValue.x, 0f, mobileInputValue.y);
-        Debug.LogError(input);
-        Vector3 movement = input * Time.fixedDeltaTime;
-        movement.x *= movementSpeed;
-        movement.z *= isGrounded ? movementSpeed : movementSpeedJumping;
-        Vector3 pos = transform.position + movement;
-        pos.x = Mathf.Clamp(pos.x, -borderX, borderX);
-        
-        playerRigidbody.MovePosition(pos);
+        Vector3 velocity = playerRigidbody.velocity;
+        velocity.z = isGrounded ? movementSpeed : forwardJumpMultiplier * movementSpeed;
+        playerRigidbody.velocity = velocity;
         if (isGrounded)
         {
-            SetState(CharacterState.Movement, mobileInputValue.y);
+            SetState(CharacterState.Movement, 1f);
         }
     }
 
     private void Jump()
     {
-
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (isGrounded)
         {
-            float horizontal = Input.GetAxis("Horizontal");
-            float forward = Input.GetAxis("Vertical");
-
-            Vector3 jumpDirection = (forward * forwardJumpMultiplier * transform.forward) +
-                                    (horizontal * forwardJumpMultiplier * transform.right) + (Vector3.up * jumpForce);
-
-            //if (jumpDirection.x > borderX)
-            //    jumpDirection.x = borderX;
-
-            //else if (jumpDirection.x < -borderX)
-            //    jumpDirection.x = -borderX;
-
-
-            playerRigidbody.AddForce(jumpDirection, ForceMode.Impulse);
+            var velocity = playerRigidbody.velocity;
+            velocity.y = jumpForce;
+            playerRigidbody.velocity = velocity;
             isGrounded = false;
             SetState(CharacterState.Jumping);
         }
