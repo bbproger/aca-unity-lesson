@@ -13,7 +13,6 @@ namespace DefaultNamespace.Runner
 
     public class MobileInput : MonoBehaviour
     {
-        [SerializeField] private Camera mainCamera;
         [SerializeField] private float delta;
         public event Action<SwipeDirection> OnSwipe;
 
@@ -21,8 +20,20 @@ namespace DefaultNamespace.Runner
         private Vector3 _startPosition;
         private Vector3 _endPosition;
 
-        private void Update()
+        private bool _interactableState;
+
+        public void SetInteractableState(bool state)
         {
+            _interactableState = state;
+        }
+
+        public void UpdateFrame()
+        {
+            if (!_interactableState)
+            {
+                return;
+            }
+
             if (Input.GetMouseButtonDown(0))
             {
                 _isDragging = true;

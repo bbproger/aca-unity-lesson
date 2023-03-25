@@ -21,7 +21,7 @@ namespace DefaultNamespace.Runner
                 Vector3 position = transform.position;
                 position.x = 0f;
                 position += bounds[i];
-                Gizmos.DrawCube(position, Vector3.one);
+                Gizmos.DrawWireCube(position, Vector3.one);
             }
         }
 

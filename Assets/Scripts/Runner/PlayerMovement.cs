@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using DefaultNamespace.Runner;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public enum CharacterState
 {
@@ -13,19 +11,20 @@ public enum CharacterState
     Falling,
 }
 
-public class CharacterMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private MobileInput mobileInput;
     [SerializeField] private CharacterMovementBounds movementBounds;
     [SerializeField] private Rigidbody playerRigidbody;
     [SerializeField] private PlayerAnimator playerAnimator;
+    [SerializeField] private PlayerCollision playerCollision;
     [SerializeField] private CapsuleCollider capsuleCollider;
     [SerializeField] private float movementSpeed;
     [SerializeField] private float movementSpeedJumping;
     [SerializeField] private float movementLeftRightTime = 0.3f;
 
-    private bool isGrounded = true;
+    private bool _isGrounded = true;
 
     [SerializeField] private float groundCheckDistance = 0.1f;
 
@@ -34,18 +33,33 @@ public class CharacterMovement : MonoBehaviour
 
     [SerializeField] private float borderX;
 
-    private int currentIndex = 1;
+    private int _currentIndex = 1;
 
-    private Coroutine leftRightCoroutine;
+    private bool _isHandleMovement;
+
+    private Coroutine _leftRightCoroutine;
 
     private void OnEnable()
     {
         mobileInput.OnSwipe += OnSwipe;
+        playerCollision.OnCollisionObstacle += OnPlayerCollisionObstacle;
     }
 
     private void OnDisable()
     {
         mobileInput.OnSwipe -= OnSwipe;
+        playerCollision.OnCollisionObstacle -= OnPlayerCollisionObstacle;
+    }
+
+    private void OnPlayerCollisionObstacle(IObstacle obstacle)
+    {
+        SetState(CharacterState.Idle);
+    }
+
+    public void SetBlockState(bool state)
+    {
+        _isHandleMovement = state;
+        playerRigidbody.isKinematic = !state;
     }
 
     private void OnSwipe(SwipeDirection direction)
@@ -68,21 +82,21 @@ public class CharacterMovement : MonoBehaviour
 
     private void HandleHorizontalMovement(SwipeDirection swipeDirection)
     {
-        int desiredIndex = movementBounds.GetNextIndex(swipeDirection, currentIndex);
-        currentIndex = desiredIndex;
+        int desiredIndex = movementBounds.GetNextIndex(swipeDirection, _currentIndex);
+        _currentIndex = desiredIndex;
         Vector3 desiredPosition = movementBounds.GetPosition(desiredIndex);
         RunCoroutine(MovePlayerToPosition(desiredPosition, movementLeftRightTime));
     }
 
     private void RunCoroutine(IEnumerator enumerator)
     {
-        if (leftRightCoroutine != null)
+        if (_leftRightCoroutine != null)
         {
-            StopCoroutine(leftRightCoroutine);
-            leftRightCoroutine = null;
+            StopCoroutine(_leftRightCoroutine);
+            _leftRightCoroutine = null;
         }
 
-        leftRightCoroutine = StartCoroutine(enumerator);
+        _leftRightCoroutine = StartCoroutine(enumerator);
     }
 
     private IEnumerator MovePlayerToPosition(Vector3 position, float time)
@@ -103,6 +117,11 @@ public class CharacterMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!_isHandleMovement)
+        {
+            return;
+        }
+
         IsGrounded();
         Move();
     }
@@ -110,9 +129,9 @@ public class CharacterMovement : MonoBehaviour
     private void Move()
     {
         Vector3 velocity = playerRigidbody.velocity;
-        velocity.z = isGrounded ? movementSpeed : forwardJumpMultiplier * movementSpeed;
+        velocity.z = _isGrounded ? movementSpeed : forwardJumpMultiplier * movementSpeed;
         playerRigidbody.velocity = velocity;
-        if (isGrounded)
+        if (_isGrounded)
         {
             SetState(CharacterState.Movement, 1f);
         }
@@ -120,12 +139,12 @@ public class CharacterMovement : MonoBehaviour
 
     private void Jump()
     {
-        if (isGrounded)
+        if (_isGrounded)
         {
             var velocity = playerRigidbody.velocity;
             velocity.y = jumpForce;
             playerRigidbody.velocity = velocity;
-            isGrounded = false;
+            _isGrounded = false;
             SetState(CharacterState.Jumping);
         }
     }
@@ -135,7 +154,7 @@ public class CharacterMovement : MonoBehaviour
         Vector3 center = transform.TransformPoint(capsuleCollider.center);
         float radius = capsuleCollider.radius;
         float castDistance = (capsuleCollider.height / 2f) - radius + groundCheckDistance;
-        isGrounded = Physics.SphereCast(center, radius, Vector3.down, out RaycastHit hit, castDistance, groundLayer);
+        _isGrounded = Physics.SphereCast(center, radius, Vector3.down, out RaycastHit hit, castDistance, groundLayer);
     }
 
     private void SetState(CharacterState state, float value = 0)

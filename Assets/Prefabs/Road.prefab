@@ -443,7 +443,7 @@ MonoBehaviour:
     - {fileID: 1552188868766925281}
     - {fileID: 1552188868942800631}
     - {fileID: 1552188869088817000}
-  fillPercent: 0
+  fillPercent: 0.136
 --- !u!1001 &1552188867366120314
 PrefabInstance:
   m_ObjectHideFlags: 0

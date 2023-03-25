@@ -16,6 +16,9 @@ namespace DefaultNamespace.Runner
         {
             switch (state)
             {
+                case CharacterState.Idle:
+                    animator.SetFloat(Speed, 0);
+                    break;
                 case CharacterState.Movement:
                     animator.SetFloat(Speed, value * movementMaxSpeed);
                     break;
