@@ -9,8 +9,7 @@ namespace DefaultNamespace.Runner
         [SerializeField] private MobileInput input;
         [SerializeField] private PlayerMovement playerMovement;
         [SerializeField] private PlayerCollision playerCollision;
-
-
+        
         private void OnEnable()
         {
             playerCollision.OnCollisionObstacle += OnPlayerCollisionObstacle;

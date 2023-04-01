@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace DefaultNamespace.Runner.UI
@@ -13,6 +14,9 @@ namespace DefaultNamespace.Runner.UI
         [SerializeField] private Button quitButton;
         [SerializeField] private TextMeshProUGUI versionText;
 
+        public UnityEvent OnPlay { get; } = new UnityEvent();
+        public UnityEvent OnSettings { get; } = new UnityEvent();
+        public UnityEvent OnAbout { get; } = new UnityEvent();
 
         public override void Init()
         {
@@ -45,14 +49,17 @@ namespace DefaultNamespace.Runner.UI
 
         private void OnPlayButtonClicked()
         {
+            OnPlay?.Invoke();
         }
 
         private void OnSettingsButtonClicked()
         {
+            OnSettings?.Invoke();
         }
 
         private void OnAboutButtonClicked()
         {
+            OnAbout?.Invoke();
         }
 
         private void OnQuitButtonClicked()

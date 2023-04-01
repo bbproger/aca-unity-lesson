@@ -1,36 +1,13 @@
-using UnityEngine;
-
 namespace DefaultNamespace.Runner
 {
     public static class Store
     {
         private const string BEST_SCORE_KEY = "bestScore";
+        private const string DIFFICULTY_LEVEL_KEY = "difficultyLevel";
+        private const string SOUND_KEY = "soundLevel";
 
-        private static int _bestScore;
-
-        public static int BestScore
-        {
-            get => _bestScore == 0 ? GetBestScore() : _bestScore;
-            private set
-            {
-                if (value <= _bestScore)
-                {
-                    return;
-                }
-
-                _bestScore = value;
-                SetBestScore(value);
-            }
-        }
-
-        private static int GetBestScore()
-        {
-            return PlayerPrefs.GetInt(BEST_SCORE_KEY, 0);
-        }
-
-        private static void SetBestScore(int score)
-        {
-            PlayerPrefs.SetInt(BEST_SCORE_KEY, score);
-        }
+        public static IntEntry BestScore { get; } = new IntEntry(BEST_SCORE_KEY);
+        public static DifficultyLevelEntry DifficultyLevel { get; } = new DifficultyLevelEntry(DIFFICULTY_LEVEL_KEY);
+        public static IntEntry Sound { get; } = new IntEntry(SOUND_KEY);
     }
 }
