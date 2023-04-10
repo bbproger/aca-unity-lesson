@@ -24,6 +24,7 @@ namespace DefaultNamespace.Runner
 
         private void HandleObstacle(IObstacle obstacle)
         {
+            obstacle.SetObstacleState(false);
             OnCollisionObstacle?.Invoke(obstacle);
         }
 

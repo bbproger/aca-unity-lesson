@@ -23,5 +23,10 @@ namespace DefaultNamespace.Runner
         protected abstract T GetValue();
         protected abstract bool HasValue(T value);
         protected abstract bool IsSame(T value, T current);
+
+        public override string ToString()
+        {
+            return Value?.ToString();
+        }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace DefaultNamespace.Runner.UI
@@ -6,6 +5,7 @@ namespace DefaultNamespace.Runner.UI
     public class NavigationFlow : MonoBehaviour
     {
         [SerializeField] private ViewService viewService;
+        [SerializeField] private GameplayAggregator gameplayAggregator;
 
         private AbstractView _currentView;
 
@@ -14,15 +14,32 @@ namespace DefaultNamespace.Runner.UI
             Run();
         }
 
-        public void Run()
+        private void OnEnable()
+        {
+            gameplayAggregator.OnDistanceChanged.AddListener(OnDistanceChanged);
+            gameplayAggregator.OnGameEnd.AddListener(OnGameEnd);
+        }
+
+        private void OnDisable()
+        {
+            gameplayAggregator.OnDistanceChanged.RemoveListener(OnDistanceChanged);
+            gameplayAggregator.OnGameEnd.RemoveListener(OnGameEnd);
+        }
+
+        private void Run()
         {
             ShowHomeView();
         }
 
         private void ShowHomeView()
         {
+            gameplayAggregator.ResetGame();
             HomeView homeView = ShowView<HomeView>();
-            homeView.OnPlay.AddListener(ShowGameView);
+            homeView.OnPlay.AddListener(() =>
+            {
+                gameplayAggregator.Init();
+                ShowGameView();
+            });
             homeView.OnSettings.AddListener(ShowSettingsView);
             homeView.OnAbout.AddListener(ShowAboutView);
             homeView.Init();
@@ -31,8 +48,28 @@ namespace DefaultNamespace.Runner.UI
         private void ShowGameView()
         {
             GameView gameView = ShowView<GameView>();
-            gameView.OnClose.AddListener(ShowHomeView);
+            gameView.OnClose.AddListener(() =>
+            {
+                gameplayAggregator.SetComponentActiveState(false);
+                ShowHomeView();
+            });
             gameView.Init();
+            gameplayAggregator.SetComponentActiveState(true);
+        }
+
+        private void OnDistanceChanged(int distance)
+        {
+            if (_currentView is not GameView gameView)
+            {
+                return;
+            }
+
+            gameView.SetDistanceText(distance);
+        }
+
+        private void OnGameEnd(int distance)
+        {
+            ShowEndGameView(distance);
         }
 
         private void ShowSettingsView()
@@ -42,8 +79,13 @@ namespace DefaultNamespace.Runner.UI
             settingsView.Init();
         }
 
-        private void ShowEndGameView()
+        private void ShowEndGameView(int distance)
         {
+            EndGameView endGameView = ShowView<EndGameView>();
+            endGameView.SetCurrentScore(distance);
+            endGameView.OnReturn.AddListener(ShowHomeView);
+            endGameView.OnContinue.AddListener(ShowGameView);
+            endGameView.Init();
         }
 
         private void ShowAboutView()

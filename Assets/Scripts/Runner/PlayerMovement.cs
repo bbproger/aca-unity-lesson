@@ -39,6 +39,13 @@ public class PlayerMovement : MonoBehaviour
 
     private Coroutine _leftRightCoroutine;
 
+    private Vector3 _initialStartingPosition;
+
+    private void Awake()
+    {
+        _initialStartingPosition = playerRigidbody.position;
+    }
+
     private void OnEnable()
     {
         mobileInput.OnSwipe += OnSwipe;
@@ -160,5 +167,10 @@ public class PlayerMovement : MonoBehaviour
     private void SetState(CharacterState state, float value = 0)
     {
         playerAnimator.SetState(state, value);
+    }
+
+    public void ResetPlayer()
+    {
+        playerRigidbody.position = _initialStartingPosition;
     }
 }

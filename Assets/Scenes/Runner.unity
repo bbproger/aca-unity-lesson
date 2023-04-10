@@ -761,6 +761,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewService: {fileID: 1133665534}
+  gameplayAggregator: {fileID: 1671230496}
 --- !u!1 &1304339267
 GameObject:
   m_ObjectHideFlags: 0

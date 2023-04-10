@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace DefaultNamespace.Runner
 {
@@ -9,7 +9,13 @@ namespace DefaultNamespace.Runner
         [SerializeField] private MobileInput input;
         [SerializeField] private PlayerMovement playerMovement;
         [SerializeField] private PlayerCollision playerCollision;
+
+        public UnityEvent<int> OnDistanceChanged { get; } = new UnityEvent<int>();
+        public UnityEvent<int> OnGameEnd { get; } = new UnityEvent<int>();
+
+        private bool _isRunning;
         
+
         private void OnEnable()
         {
             playerCollision.OnCollisionObstacle += OnPlayerCollisionObstacle;
@@ -20,21 +26,31 @@ namespace DefaultNamespace.Runner
             playerCollision.OnCollisionObstacle -= OnPlayerCollisionObstacle;
         }
 
-        [ContextMenu("Play")]
         public void Init()
         {
             roadSpawner.Init();
-            SetComponentActiveState(true);
         }
 
+        public void ResetGame()
+        {
+            roadSpawner.ResetSpawner();
+            playerMovement.ResetPlayer();
+        }
         private void Update()
         {
+            if (!_isRunning)
+            {
+                return;
+            }
+
             roadSpawner.UpdateFrame();
             input.UpdateFrame();
+            OnDistanceChanged?.Invoke(Mathf.Max(0, Mathf.RoundToInt(playerMovement.transform.position.z)));
         }
 
-        private void SetComponentActiveState(bool state)
+        public void SetComponentActiveState(bool state)
         {
+            _isRunning = state;
             input.SetInteractableState(state);
             playerMovement.SetBlockState(state);
             roadSpawner.SetCanSpawnState(state);
@@ -43,6 +59,9 @@ namespace DefaultNamespace.Runner
         private void OnPlayerCollisionObstacle(IObstacle obstacle)
         {
             SetComponentActiveState(false);
+            int distance = Mathf.Max(0, Mathf.RoundToInt(playerMovement.transform.position.z));
+            Store.BestScore.Value = distance;
+            OnGameEnd?.Invoke(distance);
         }
     }
 }

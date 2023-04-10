@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0000000
+  m_text: 00000000
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8e4eadcc9c4714fccb4a16477ec56dba, type: 2}
   m_sharedMaterial: {fileID: 7531571260003627567, guid: 8e4eadcc9c4714fccb4a16477ec56dba, type: 2}
@@ -314,6 +314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 1583528888658148523}
   closeButton: {fileID: 1583528888865452047}
+  distanceText: {fileID: 1583528887454384455}
 --- !u!1 &1583528888865452045
 GameObject:
   m_ObjectHideFlags: 0

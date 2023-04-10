@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace DefaultNamespace.Runner.UI
@@ -8,8 +9,11 @@ namespace DefaultNamespace.Runner.UI
     {
         [SerializeField] private TextMeshProUGUI scoreText;
         [SerializeField] private TextMeshProUGUI bestScoreText;
-        [SerializeField] private Button restartButton;
+        [SerializeField] private Button continueButton;
         [SerializeField] private Button returnButton;
+
+        public UnityEvent OnContinue { get; } = new UnityEvent();
+        public UnityEvent OnReturn { get; } = new UnityEvent();
 
         public override void Init()
         {
@@ -19,24 +23,26 @@ namespace DefaultNamespace.Runner.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            restartButton.onClick.AddListener(OnRestartButtonClicked);
+            continueButton.onClick.AddListener(OnContinueButtonClicked);
             returnButton.onClick.AddListener(OnReturnButtonClicked);
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            restartButton.onClick.RemoveListener(OnRestartButtonClicked);
+            continueButton.onClick.RemoveListener(OnContinueButtonClicked);
             returnButton.onClick.RemoveListener(OnReturnButtonClicked);
         }
 
 
-        private void OnRestartButtonClicked()
+        private void OnContinueButtonClicked()
         {
+            OnContinue?.Invoke();
         }
 
         private void OnReturnButtonClicked()
         {
+            OnReturn?.Invoke();
         }
 
         public void SetCurrentScore(int score)
@@ -46,7 +52,7 @@ namespace DefaultNamespace.Runner.UI
 
         private void SetBestScore()
         {
-            bestScoreText.text = $"{Store.BestScore:D8}";
+            bestScoreText.text = $"{Store.BestScore.Value:D8}";
         }
     }
 }

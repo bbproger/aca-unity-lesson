@@ -69,4 +69,21 @@ public class RoadSpawner : MonoBehaviour
         activePlatforms.Remove(platform);
         platformPool.Enqueue(platform);
     }
+
+    public void ResetSpawner()
+    {
+        _lastPosition = Vector3.zero;
+        while (platformPool.Count > 0)
+        {
+            DestroyImmediate(platformPool.Dequeue().gameObject);
+        }
+
+        for (int i = 0; i < activePlatforms.Count; i++)
+        {
+            DestroyImmediate(activePlatforms[i].gameObject);
+        }
+
+        platformPool.Clear();
+        activePlatforms.Clear();
+    }
 }

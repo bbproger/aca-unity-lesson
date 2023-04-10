@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3521765596111307526}
   - component: {fileID: 3521765596111307525}
   m_Layer: 5
-  m_Name: RestartButton
+  m_Name: ContinueButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -496,7 +496,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Restart
+  m_text: Continue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 04331fe742ea749d1a57730207cfafcd, type: 2}
   m_sharedMaterial: {fileID: -8320822431616963337, guid: 04331fe742ea749d1a57730207cfafcd, type: 2}
@@ -1025,7 +1025,7 @@ MonoBehaviour:
   canvasGroup: {fileID: 3521765597358224770}
   scoreText: {fileID: 3521765596541768539}
   bestScoreText: {fileID: 3521765597171553539}
-  restartButton: {fileID: 3521765596111307525}
+  continueButton: {fileID: 3521765596111307525}
   returnButton: {fileID: 3521765596974466834}
 --- !u!1 &3521765597569621477
 GameObject:
